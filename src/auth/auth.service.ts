@@ -5,11 +5,10 @@ import * as bcrypt from 'bcrypt';
 import { sign, verify, type JwtPayload } from 'jsonwebtoken';
 import { Request, Response } from 'express';
 
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-
-import { Account, AccountDocument, AccountTypeDoc } from './schemas/account.schema';
-import { UserNotFound, UserExistException, InvalidPasswordException, UnauthorizedException, InternalErrorException  } from 'src/excepetions';
+import { RegisterDto, LoginDto } from './dto';
+import { Account } from './schemas';
+import { AccountDocument, AccountTypeDoc } from "./interfaces"
+import { UserNotFound, UserExistException, InvalidPasswordException, UnauthorizedException, InternalErrorException  } from '../excepetions';
 
 @Injectable()
 export class AuthService

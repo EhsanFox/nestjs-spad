@@ -3,7 +3,8 @@ import { verify } from 'jsonwebtoken';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { Account, AccountDocument } from './schemas/account.schema';
+import { AccountDocument } from './interfaces';
+import { Account } from './schemas';
 import { Request } from 'express';
 
 declare module 'express'

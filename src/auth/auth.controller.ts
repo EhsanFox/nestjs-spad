@@ -3,16 +3,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
 import mimetypes from "mime-types"
 
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import { LoginDto, RegisterDto, UpdateDto } from './dto';
+import { AccountTypeDoc } from './interfaces';
+import { iUploadFile } from './types';
 
 import { AuthGuard } from './auth.guard';
-
 import { AuthService } from './auth.service';
 import { AccountDecorator } from './account.decorator';
-import { UpdateDto } from './dto/update.dto';
-import { AccountTypeDoc } from './schemas/account.schema';
-import { iUploadFile } from './types';
 
 @Controller('auth')
 export class AuthController
