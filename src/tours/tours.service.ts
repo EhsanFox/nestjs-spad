@@ -89,7 +89,7 @@ export class ToursService {
     }
 
     async updateTour(_id: string, tourDto: UpdateTourDto) {
-        const tour = this.tourModel.findById(_id);
+        const tour = await this.tourModel.findById(_id);
         if (!tour) throw new TourNotFoundException();
 
         // Handle updated Staying Nights and DAys
