@@ -9,6 +9,7 @@ export interface iTour extends Document {
     customers: string[];
     seats: number;
     price: number;
+    pictures: Buffer[];
     options: unknown[];
     includedMeals: Meals[];
     startRegisterDate: Date | string;
