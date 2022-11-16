@@ -11,6 +11,7 @@ import { BuyTourDto } from "./dto/buyTour.dto";
 import { TourNotFoundException } from "src/excepetions/TourNotFound.excp";
 import { TourClosedException } from "src/excepetions/TourClosed.excp";
 import { CountryNotFoundException } from "src/excepetions/CountryNotFound.excp";
+import { UpdateTourDto } from "./dto/updateTour.dto";
 
 @Injectable()
 export class ToursService {
@@ -46,7 +47,7 @@ export class ToursService {
     }
 
     async registerTour(tourDto: RegisteTourDto) {
-        let country: iLocation = await this.locationModel.findOne({
+        let country = await this.locationModel.findOne({
             countryName: tourDto.countryName,
             persianName: tourDto.persianCountryName,
         });
@@ -81,9 +82,53 @@ export class ToursService {
             stayingNights: nights.toFixed(0),
         });
 
-        return await (
-            await (await data.populate("cities")).populate("location")
-        ).populate("customers");
+        const popResult = await data.populate("cities");
+        const popResultLoc = await popResult.populate("location");
+        const result = await popResultLoc.populate("customers");
+        return result;
+    }
+
+    async updateTour(_id: string, tourDto: UpdateTourDto) {
+        const tour = this.tourModel.findById(_id);
+        if (!tour) throw new TourNotFoundException();
+
+        // Handle updated Staying Nights and DAys
+        let days = tour.stayingDays,
+            nights = tour.stayingNights;
+        if (tourDto.arrivalDate || tourDto.departureDate) {
+            const diffHours =
+                Math.abs(
+                    new Date(
+                        tourDto.arrivalDate
+                            ? (tourDto.arrivalDate as string)
+                            : (tour.arrivalDate as string)
+                    ).getTime() -
+                        new Date(
+                            tourDto.departureDate
+                                ? (tourDto.departureDate as string)
+                                : (tour.departureDate as string)
+                        ).getTime()
+                ) / 36e5;
+            days = diffHours / 24;
+            nights = diffHours % 24 === days ? days : days - 1;
+        }
+
+        return await this.tourModel.findByIdAndUpdate(
+            _id,
+            {
+                ...tourDto,
+                stayingDays: days,
+                stayingNights: nights,
+            },
+            { new: true }
+        );
+    }
+
+    async deleteTour(_id: string) {
+        const tour = await this.tourModel.findById(_id);
+        if (!tour) throw new TourNotFoundException();
+
+        return await this.tourModel.findByIdAndDelete(_id);
     }
 
     async buyTour(buyDto: BuyTourDto) {
@@ -101,7 +146,9 @@ export class ToursService {
             tour.seats = tour.seats - buyDto.passengerCount;
             //tour.customers.push("1234-user"); //TODO: Add AuthGaurd and Get UserID from Controller
             const result = await tour.save();
-            return await (await result.populate("location")).populate("cities");
+            const popResult = await result.populate("location");
+            const popResultFinal = await popResult.populate("cities");
+            return popResultFinal;
         } else throw new TourClosedException();
     }
 }

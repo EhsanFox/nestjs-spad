@@ -8,6 +8,6 @@ export class BuyTourDto {
     @IsNumber()
     passengerCount: number;
 
-    @IsEnum(Meals)
+    @IsEnum(Meals, { each: true })
     meals: Meals[];
 }

@@ -1,6 +1,16 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Patch,
+    Query,
+} from "@nestjs/common";
 import { BuyTourDto } from "./dto/buyTour.dto";
 import { RegisteTourDto } from "./dto/registerTour.dto";
+import { UpdateTourDto } from "./dto/updateTour.dto";
 import { ToursService } from "./tours.service";
 
 @Controller("tours")
@@ -23,6 +33,19 @@ export class ToursController {
     @Post("register")
     async registerTour(@Body() tourDto: RegisteTourDto) {
         return await this.tourService.registerTour(tourDto);
+    }
+
+    @Patch(":id")
+    async updateTour(
+        @Param("id") tourId: string,
+        @Body() updateTourDto: UpdateTourDto
+    ) {
+        return await this.tourService.updateTour(tourId, updateTourDto);
+    }
+
+    @Delete(":id")
+    async deleteTour(@Param("id") tourId: string) {
+        return await this.tourService.deleteTour(tourId);
     }
 
     @Post("buy")

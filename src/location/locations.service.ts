@@ -18,7 +18,7 @@ export class LocationService {
     ) {}
 
     private async registerCity(name: string, countryName?: string) {
-        let country: iLocation;
+        let country;
         const cityExist = await this.cityModel.findOne({ name });
         if (countryName) {
             country = await this.locationModel.findOne({ countryName });
