@@ -15,6 +15,6 @@ export interface iTour extends Document {
     endRegisterDate: Date | string;
     arrivalDate: Date | string;
     departureDate: Date | string;
-    nights: number;
-    days: number;
+    stayingNights: number;
+    stayingDays: number;
 }
