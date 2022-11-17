@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
 
-export class TourClosedException extends HttpException {
+export class TourExistException extends HttpException {
     constructor(
         private readonly logData?: Error | string,
         private readonly messaage: string = "Tour has been sold out or the registeration time has ran out or not yet arrived.",

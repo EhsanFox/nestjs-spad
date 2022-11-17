@@ -5,7 +5,7 @@ import { iTour } from "../interfaces/tours.interface";
 
 @Schema({ timestamps: true })
 export class Tour {
-    @Prop({ type: String, required: true, unique: true })
+    @Prop({ type: String, required: true })
     name: string;
 
     @Prop({ type: Number, required: true })
@@ -28,9 +28,6 @@ export class Tour {
 
     @Prop({ type: String, required: true, ref: City.name })
     city: string;
-
-    @Prop({ type: String, required: true, ref: Country.name })
-    country: string;
 
     @Prop({
         type: [

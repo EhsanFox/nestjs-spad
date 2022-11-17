@@ -6,6 +6,7 @@ import { iTour } from "./interfaces/tours.interface";
 import { Tour } from "./schemas/tour.schema";
 import { LocationService } from "src/location/locations.service";
 import { TourNotFoundException } from "src/excepetions/TourNotFound.excp";
+import { TourExistException } from "src/excepetions/TourExist.excp";
 
 @Injectable()
 export class ToursService {
@@ -14,8 +15,30 @@ export class ToursService {
         private readonly locationService: LocationService
     ) {}
 
-    async deleteTour(title: string) {
-        return await this.tourModel.findOneAndDelete({ title });
+    async registerTour(tourDto: TourDto) {
+        const city = await this.locationService.getCity(tourDto.city);
+        const tourExist = await this.tourModel.findOne({ name: tourDto.name });
+        if (tourExist) throw new TourExistException();
+
+        return await this.tourModel.create({
+            ...tourDto,
+            city: city._id,
+        });
+    }
+
+    async updateTour(_id: string, tourDto: TourDto) {
+        const tour = await this.tourModel.findById(_id);
+        if (!tour) throw new TourNotFoundException();
+
+        return await this.tourModel.findByIdAndUpdate(
+            _id,
+            { ...tourDto },
+            { new: true }
+        );
+    }
+
+    async deleteTour(_id: string) {
+        return await this.tourModel.findByIdAndDelete(_id);
     }
 
     async getPopularTours() {
@@ -29,7 +52,7 @@ export class ToursService {
         );
         const tours = await this.tourModel.find(
             { city: city._id },
-            { populate: ["country", "city"] }
+            { populate: "city" }
         );
         if (!tours || !tours.length) throw new TourNotFoundException();
 
@@ -43,17 +66,14 @@ export class ToursService {
         );
         const tours = await this.tourModel.find(
             { country: country._id },
-            { populate: ["country", "city"] }
+            { populate: "city" }
         );
         if (!tours || !tours.length) throw new TourNotFoundException();
 
         return tours;
     }
 
-    async getTour(name: string) {
-        return await this.tourModel.findOne(
-            { name },
-            { populate: ["country", "city"] }
-        );
+    async getTour(id: string) {
+        return await this.tourModel.findById(id, { populate: "city" });
     }
 }

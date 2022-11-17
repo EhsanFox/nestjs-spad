@@ -13,5 +13,4 @@ export interface iTour extends Document {
         data: Buffer;
     }[];
     city: string;
-    country: string;
 }

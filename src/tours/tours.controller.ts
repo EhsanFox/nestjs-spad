@@ -5,7 +5,7 @@ import {
     Get,
     Param,
     Post,
-    Patch,
+    Put,
     Query,
     UseInterceptors,
     ClassSerializerInterceptor,
@@ -13,6 +13,7 @@ import {
 } from "@nestjs/common";
 import { TourNotFoundException } from "src/excepetions/TourNotFound.excp";
 import { TourDto } from "./dto/tour.dto";
+import { TourOutputDto } from "./dto/tourOutput.dto";
 import { iTour } from "./interfaces/tours.interface";
 import { ToursService } from "./tours.service";
 
@@ -20,21 +21,44 @@ import { ToursService } from "./tours.service";
 export class ToursController {
     constructor(private readonly tourService: ToursService) {}
 
+    @UseInterceptors(ClassSerializerInterceptor)
     @Get(":country")
-    async test(
+    async countryTours(
         @Param("country") country: string,
         @Query("english") isEnglishName = true
-    ) {
-        return await this.tourService.getCountryTours(country, !isEnglishName);
+    ): Promise<TourOutputDto[]> {
+        const tours = await this.tourService.getCountryTours(
+            country,
+            !isEnglishName
+        );
+        return tours.map((x) => new TourOutputDto(x));
     }
 
-    @Delete(":title")
-    async deleteTour(@Param("title") title: string) {
-        const tour = await this.tourService.deleteTour(title);
+    @UseInterceptors(ClassSerializerInterceptor)
+    @Get(":city")
+    async cityTours(
+        @Param("city") city: string,
+        @Query("english") isEnglishName = true
+    ): Promise<TourOutputDto[]> {
+        const tours = await this.tourService.getCityTours(city, !isEnglishName);
+        return tours.map((x) => new TourOutputDto(x));
+    }
+
+    @Delete(":id")
+    async deleteTour(@Param("id") id: string) {
+        const tour = await this.tourService.deleteTour(id);
         if (!tour) throw new TourNotFoundException();
-        else return { message: "ok", statusCode: HttpStatus.OK };
+        else return true;
+    }
+
+    @Put(":id")
+    async updateTour(@Param("id") tourId: string) {
+        return true;
     }
 
     @Post("new")
-    async createNewTour(@Body() tourDto: TourDto) {}
+    async createNewTour(@Body() tourDto: TourDto) {
+        const result = await this.tourService.registerTour(tourDto);
+        return new TourOutputDto(result);
+    }
 }

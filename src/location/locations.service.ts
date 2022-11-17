@@ -99,4 +99,8 @@ export class LocationService {
             return await this.cityModel.findOne({ persianName: name });
         else return await this.cityModel.findOne({ name });
     }
+
+    async getAllCountry() {
+        const list = await this.countryModel.find();
+    }
 }
