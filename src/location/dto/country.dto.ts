@@ -8,7 +8,8 @@ export class CountryDto {
 
     @Transform((x) => {
         const unParsedName: string = x.value;
-        return unParsedName.split(" ").join("_").split("-").join("_");
+        x.value = unParsedName.split(" ").join("_").split("-").join("_");
+        return x;
     })
     name: string;
     persianName: string;
