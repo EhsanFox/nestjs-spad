@@ -6,7 +6,6 @@ import { iTour } from "./interfaces/tours.interface";
 import { Tour } from "./schemas/tour.schema";
 import { LocationService } from "src/location/locations.service";
 import { TourNotFoundException } from "src/excepetions/TourNotFound.excp";
-import { TourClosedException } from "src/excepetions/TourClosed.excp";
 
 @Injectable()
 export class ToursService {
@@ -14,6 +13,10 @@ export class ToursService {
         @InjectModel(Tour.name) private readonly tourModel: Model<iTour>,
         private readonly locationService: LocationService
     ) {}
+
+    async deleteTour(title: string) {
+        return await this.tourModel.findOneAndDelete({ title });
+    }
 
     async getPopularTours() {
         return await this.tourModel.find({ isPopular: true });
