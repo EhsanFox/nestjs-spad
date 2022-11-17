@@ -1,1 +1,0 @@
-export const DYNAMIC_MODULE = "DYNAMIC_CLIENT";
