@@ -3,7 +3,6 @@ import { LocationService } from "./locations.service";
 import { MongooseModule } from "@nestjs/mongoose";
 import { Country, CountrySchema } from "./schemas/country.schema";
 import { City, CitySchema } from "./schemas/city.schema";
-import { LocationController } from "./location.controller";
 @Module({
     imports: [
         MongooseModule.forFeature([
@@ -19,6 +18,5 @@ import { LocationController } from "./location.controller";
     ],
     providers: [LocationService],
     exports: [LocationService],
-    controllers: [LocationController],
 })
 export class LocationsModule {}

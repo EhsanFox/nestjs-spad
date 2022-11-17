@@ -74,6 +74,9 @@ export class ToursService {
     }
 
     async getTour(id: string) {
-        return await this.tourModel.findById(id, { populate: "city" });
+        const tour = await this.tourModel.findById(id, { populate: "city" });
+        if (!tour) throw new TourNotFoundException();
+
+        return tour;
     }
 }

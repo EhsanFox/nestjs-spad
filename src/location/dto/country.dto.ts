@@ -1,22 +1,25 @@
-import { Exclude, Transform } from "class-transformer";
+import { Transform } from "class-transformer";
+import { IsNotEmpty, IsString } from "class-validator";
 export class CountryDto {
-    @Exclude()
-    _id: string;
-
-    @Exclude()
-    __v: unknown;
-
+    @IsString()
     @Transform((x) => {
         const unParsedName: string = x.value;
         x.value = unParsedName.split(" ").join("_").split("-").join("_");
         return x;
     })
     name: string;
-    persianName: string;
-    description: string;
-    image: Buffer;
 
-    constructor(partial: Partial<CountryDto>) {
-        Object.assign(this, partial);
-    }
+    @IsString()
+    @Transform((x) => {
+        const unParsedName: string = x.value;
+        x.value = unParsedName.split(" ").join("_").split("-").join("_");
+        return x;
+    })
+    persianName: string;
+
+    @IsString()
+    description: string;
+
+    @IsNotEmpty()
+    image: Buffer;
 }

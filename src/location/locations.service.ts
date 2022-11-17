@@ -2,8 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { CityExistException } from "src/excepetions/CityExist.excp";
+import { CityNotFoundException } from "src/excepetions/CityNotFound.excp";
 import { CountryExistException } from "src/excepetions/CountryExist.excp";
 import { CountryNotFoundException } from "src/excepetions/CountryNotFound.excp";
+import { CityDto } from "./dto/city.dto";
+import { CountryDto } from "./dto/country.dto";
 import { iCity } from "./interfaces/city.interface";
 import { iCountry } from "./interfaces/country.interface";
 import { City } from "./schemas/city.schema";
@@ -17,42 +20,26 @@ export class LocationService {
         private readonly countryModel: Model<iCountry>
     ) {}
 
-    async registerCity(
-        country: string,
-        name: string,
-        persianName: string,
-        image: Buffer,
-        isPopular = false
-    ) {
-        const city = await this.cityModel.findOne({ name });
+    async registerCity(cityDto: CityDto) {
+        const city = await this.cityModel.findOne({ name: cityDto.name });
         if (city) throw new CityExistException();
 
-        const countryObj = this.countryModel.findOne({ name: country });
+        const countryObj = this.countryModel.findOne({ name: cityDto.country });
         if (!countryObj) throw new CountryNotFoundException();
 
         return await this.cityModel.create({
-            country,
-            name,
-            persianName,
-            image,
-            isPopular,
+            ...cityDto,
         });
     }
 
-    async registerCountry(
-        countryName: string,
-        persianName: string,
-        description: string,
-        image: Buffer
-    ) {
-        const country = await this.countryModel.findOne({ name: countryName });
+    async registerCountry(countryDto: CountryDto) {
+        const country = await this.countryModel.findOne({
+            name: countryDto.name,
+        });
         if (country) throw new CountryExistException();
 
         return await this.countryModel.create({
-            name: countryName,
-            persianName,
-            description,
-            image,
+            ...countryDto,
         });
     }
 
@@ -101,6 +88,46 @@ export class LocationService {
     }
 
     async getAllCountry() {
-        const list = await this.countryModel.find();
+        return await this.countryModel.find();
+    }
+
+    async getAllCity() {
+        return await this.cityModel.find({}, { populate: "country" });
+    }
+
+    async updateCity(_id: string, cityDto: CityDto) {
+        const city = await this.cityModel.findById(_id);
+        if (!city) throw new CityNotFoundException();
+
+        return await this.cityModel.findByIdAndUpdate(
+            _id,
+            { ...cityDto },
+            { new: true }
+        );
+    }
+
+    async updateCountry(_id: string, countryDto: CountryDto) {
+        const country = await this.countryModel.findById(_id);
+        if (!country) throw new CountryNotFoundException();
+
+        return await this.countryModel.findByIdAndUpdate(
+            _id,
+            { ...countryDto },
+            { new: true }
+        );
+    }
+
+    async deleteCity(_id: string) {
+        const city = await this.cityModel.findById(_id);
+        if (!city) throw new CityNotFoundException();
+
+        return await this.cityModel.findByIdAndDelete(_id);
+    }
+
+    async deleteCountry(_id: string) {
+        const country = await this.countryModel.findById(_id);
+        if (!country) throw new CountryNotFoundException();
+
+        return await this.countryModel.findByIdAndDelete(_id);
     }
 }

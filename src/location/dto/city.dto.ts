@@ -1,19 +1,18 @@
-import { Exclude } from "class-transformer";
+import { IsString, IsBoolean, IsNotEmpty } from "class-validator";
 
 export class CityDto {
-    @Exclude()
-    _id: string;
-
-    @Exclude()
-    __v: unknown;
-
+    @IsString()
     country: string;
-    name: string;
-    persianName: string;
-    isPopular: boolean;
-    image: Buffer;
 
-    constructor(partial: Partial<CityDto>) {
-        Object.assign(this, partial);
-    }
+    @IsString()
+    name: string;
+
+    @IsString()
+    persianName: string;
+
+    @IsBoolean()
+    isPopular: boolean;
+
+    @IsNotEmpty()
+    image: Buffer;
 }
