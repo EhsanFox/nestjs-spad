@@ -9,7 +9,7 @@ import {
     Query,
 } from "@nestjs/common";
 import { BuyTourDto } from "./dto/buyTour.dto";
-import { RegisteTourDto } from "./dto/registerTour.dto";
+import { RegisteTourDto } from "./dto/tour.dto";
 import { UpdateTourDto } from "./dto/updateTour.dto";
 import { ToursService } from "./tours.service";
 

@@ -8,22 +8,20 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule } from "@nestjs/config";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { NumberMiddleware } from "./number.middleware";
-import { DynamicModule } from "./dynamic/dynamic.module";
-import { RequestModule } from "./request/request.module";
 import { AuthModule } from "./auth/auth.module";
 import { ToursModule } from "./tours/tours.module";
 import { LocationsModule } from "./location/locations.module";
+import { UsersModule } from "./users/users.module";
 
 @Module({
     imports: [
         ConfigModule.forRoot(),
         ThrottlerModule.forRoot({ ttl: 60, limit: 10 }),
         MongooseModule.forRoot(process.env.MONGODB_URL),
-        DynamicModule.forRoot("http://localhost:3000/request/log"),
-        RequestModule,
         AuthModule,
         LocationsModule,
         ToursModule,
+        UsersModule,
     ],
     controllers: [],
     providers: [],

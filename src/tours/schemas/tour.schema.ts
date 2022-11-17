@@ -1,56 +1,47 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { type Date, Types } from "mongoose";
-import { Meals } from "../constants/enums/meals";
+import { Country } from "src/location/schemas/country.schema";
 import { City } from "../../location/schemas/city.schema";
-import { Location } from "../../location/schemas/location.schema";
-import { Account } from "src/auth/schemas";
+import { iTour } from "../interfaces/tours.interface";
 
 @Schema({ timestamps: true })
 export class Tour {
-    @Prop({ type: String, required: true, unique: true, lowercase: true })
-    title: string;
-
-    @Prop({ type: Types.ObjectId, required: true, ref: Location.name })
-    location: Types.ObjectId;
-
-    @Prop({ type: [Types.ObjectId], required: false, ref: City.name })
-    cities: string[];
-
-    @Prop({ type: [Types.ObjectId], required: false, ref: Account.name })
-    customers: string[];
-
-    @Prop({ type: Number, required: true })
-    priority: number;
-
-    @Prop({ type: Number, required: true })
-    seats: number;
+    @Prop({ type: String, required: true, unique: true })
+    name: string;
 
     @Prop({ type: Number, required: true })
     price: number;
 
-    @Prop({ type: [String], enum: Meals, required: false, default: [] })
-    includedMeals: Meals[];
-
-    @Prop({ type: [String], required: false, default: [] })
-    options: unknown[];
-
-    @Prop({ type: Date, required: true })
-    startRegisterDate: Date;
-
-    @Prop({ type: Date, required: true })
-    endRegisterDate: Date;
-
-    @Prop({ type: Date, required: true })
-    arrivalDate: Date;
-
-    @Prop({ type: Date, required: true })
-    departureDate: Date;
-
     @Prop({ type: Number, required: true })
     stayingDays: number;
 
+    @Prop({ type: String, required: true })
+    airline: string;
+
     @Prop({ type: Number, required: true })
-    stayingNights: number;
+    hotelStars: number;
+
+    @Prop({ type: String, required: true })
+    description: string;
+
+    @Prop({ type: Boolean, required: false, default: false })
+    isPopular: boolean;
+
+    @Prop({ type: String, required: true, ref: City.name })
+    city: string;
+
+    @Prop({ type: String, required: true, ref: Country.name })
+    country: string;
+
+    @Prop({
+        type: [
+            {
+                title: { type: String, required: true },
+                data: { type: Buffer, required: true },
+            },
+        ],
+        required: true,
+    })
+    images: iTour["images"];
 }
 
 export const TourSchema = SchemaFactory.createForClass(Tour);

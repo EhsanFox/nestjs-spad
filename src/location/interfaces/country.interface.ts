@@ -1,9 +1,8 @@
 import { Document } from "mongoose";
 
-export interface iCity extends Document<string> {
-    country: string;
+export interface iCountry extends Document<string> {
     name: string;
     persianName: string;
+    description: string;
     image: Buffer;
-    isPopular: boolean;
 }

@@ -5,64 +5,98 @@ import { CityExistException } from "src/excepetions/CityExist.excp";
 import { CountryExistException } from "src/excepetions/CountryExist.excp";
 import { CountryNotFoundException } from "src/excepetions/CountryNotFound.excp";
 import { iCity } from "./interfaces/city.interface";
-import { iLocation } from "./interfaces/location.interface";
+import { iCountry } from "./interfaces/country.interface";
 import { City } from "./schemas/city.schema";
-import { Location } from "./schemas/location.schema";
+import { Country } from "./schemas/country.schema";
 
 @Injectable()
 export class LocationService {
     constructor(
         @InjectModel(City.name) private readonly cityModel: Model<iCity>,
-        @InjectModel(Location.name)
-        private readonly locationModel: Model<iLocation>
+        @InjectModel(Country.name)
+        private readonly countryModel: Model<iCountry>
     ) {}
 
-    private async registerCity(name: string, countryName?: string) {
-        let country;
-        const cityExist = await this.cityModel.findOne({ name });
-        if (countryName) {
-            country = await this.locationModel.findOne({ countryName });
-            if (!country) throw new CountryNotFoundException();
-        }
-        if (cityExist) throw new CityExistException();
+    async registerCity(
+        country: string,
+        name: string,
+        persianName: string,
+        image: Buffer,
+        isPopular = false
+    ) {
+        const city = await this.cityModel.findOne({ name });
+        if (city) throw new CityExistException();
 
-        const city = await this.cityModel.create({
+        const countryObj = this.countryModel.findOne({ name: country });
+        if (!countryObj) throw new CountryNotFoundException();
+
+        return await this.cityModel.create({
+            country,
             name,
+            persianName,
+            image,
+            isPopular,
         });
-
-        if (country) {
-            country.cities.push(city._id);
-            return await country.save();
-        } else return city;
     }
 
-    async registerLocation(
+    async registerCountry(
         countryName: string,
         persianName: string,
-        cities: string[] = []
+        description: string,
+        image: Buffer
     ) {
-        const country = await this.locationModel.findOne({
-            countryName,
-            persianName,
-        });
+        const country = await this.countryModel.findOne({ name: countryName });
         if (country) throw new CountryExistException();
 
-        const cityIds: string[] = [];
-        if (cities) {
-            for (const city of cities) {
-                const icity = await this.cityModel.findOne({ name: city });
-                if (icity) cityIds.push(icity._id);
-                else {
-                    const newCity = await this.registerCity(city);
-                    cityIds.push(newCity._id);
-                }
-            }
-        }
-
-        return await this.locationModel.create({
-            countryName,
+        return await this.countryModel.create({
+            name: countryName,
             persianName,
-            cities: cityIds,
+            description,
+            image,
         });
+    }
+
+    async getPopularCities() {
+        return await this.cityModel.find({ isPopular: true });
+    }
+
+    async getCountryByRegex(keyword: string, persianName = false) {
+        if (persianName)
+            return await this.countryModel.find({
+                persianName: {
+                    $regex: new RegExp(`^${keyword.toLowerCase()}`, "i"),
+                },
+            });
+        else
+            return await this.countryModel.find({
+                name: {
+                    $regex: new RegExp(`^${keyword.toLowerCase()}`, "i"),
+                },
+            });
+    }
+
+    async getCityByRegex(keyword: string, persianName = false) {
+        if (persianName)
+            return await this.cityModel.find({
+                persianName: {
+                    $regex: new RegExp(`^${keyword.toLowerCase()}`, "i"),
+                },
+            });
+        else
+            return await this.cityModel.find({
+                name: { $regex: new RegExp(`^${keyword.toLowerCase()}`, "i") },
+            });
+    }
+
+    async getCountry(name: string, isPersianName = false) {
+        if (isPersianName)
+            return await this.countryModel.findOne({ persianName: name });
+        else return await this.countryModel.findOne({ name });
+    }
+
+    async getCity(name: string, isPersianName = false) {
+        if (isPersianName)
+            return await this.cityModel.findOne({ persianName: name });
+        else return await this.cityModel.findOne({ name });
     }
 }

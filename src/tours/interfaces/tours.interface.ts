@@ -1,21 +1,17 @@
-import { Date, Document } from "mongoose";
-import { Meals } from "../constants/enums/meals";
-import { iLocation } from "../../location/interfaces/location.interface";
+import { Document } from "mongoose";
 
 export interface iTour extends Document {
-    title: string;
-    location: iLocation;
-    priority: number;
-    customers: string[];
-    seats: number;
+    name: string;
     price: number;
-    pictures: Buffer[];
-    options: unknown[];
-    includedMeals: Meals[];
-    startRegisterDate: Date | string;
-    endRegisterDate: Date | string;
-    arrivalDate: Date | string;
-    departureDate: Date | string;
-    stayingNights: number;
     stayingDays: number;
+    airline: string;
+    hotelStars: number;
+    description: string;
+    isPopular: boolean;
+    images: {
+        title: string;
+        data: Buffer;
+    }[];
+    city: string;
+    country: string;
 }
