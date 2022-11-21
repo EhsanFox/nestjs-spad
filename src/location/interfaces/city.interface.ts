@@ -4,6 +4,6 @@ export interface iCity extends Document<string> {
     country: string;
     name: string;
     persianName: string;
-    image: Buffer;
+    image: string;
     isPopular: boolean;
 }

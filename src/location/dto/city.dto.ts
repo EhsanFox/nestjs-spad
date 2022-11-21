@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsNotEmpty } from "class-validator";
+import { IsString, IsBoolean, IsOptional } from "class-validator";
 
 export class CityDto {
     @IsString()
@@ -13,6 +13,6 @@ export class CityDto {
     @IsBoolean()
     isPopular: boolean;
 
-    @IsNotEmpty()
-    image: Buffer;
+    @IsOptional()
+    image?: string;
 }

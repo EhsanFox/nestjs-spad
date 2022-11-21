@@ -15,7 +15,7 @@ import { Response, Request } from "express";
 import mimetypes from "mime-types";
 
 import { LoginDto, RegisterDto, UpdateDto } from "./dto";
-import { iUploadFile } from "./types";
+import { iUploadFile } from "../shared/types";
 
 import { AuthService } from "./auth.service";
 import { AccountDecorator } from "src/shared/account.decorator";

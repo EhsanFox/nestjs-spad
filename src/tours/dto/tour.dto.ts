@@ -3,14 +3,10 @@ import {
     IsString,
     IsAscii,
     IsBoolean,
-    IsArray,
-    ValidateNested,
+    IsOptional,
 } from "class-validator";
-import { Type } from "class-transformer";
 import { IsHotelStar } from "../hotelstar.validator";
 import { IsInt32 } from "../int32.validator";
-import { iTour } from "../interfaces/tours.interface";
-import { ImageDto } from "./image.dto";
 
 export class TourDto {
     @IsString()
@@ -41,8 +37,6 @@ export class TourDto {
     @IsString()
     city: string;
 
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => ImageDto)
-    images: iTour["images"];
+    @IsOptional()
+    images?: string[];
 }

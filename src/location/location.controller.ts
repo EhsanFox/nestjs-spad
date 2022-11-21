@@ -10,10 +10,14 @@ import {
     UseInterceptors,
     UseGuards,
     Query,
+    UploadedFile,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import mimetypes from "mime-types";
 import { CityNotFoundException } from "src/excepetions/CityNotFound.excp";
 import { CountryNotFoundException } from "src/excepetions/CountryNotFound.excp";
 import { AuthGuard } from "src/shared/auth.guard";
+import { UploadStorage } from "src/shared/images.storage";
 import { CityDto } from "./dto/city.dto";
 import { CityOutputDto } from "./dto/cityOutput.dto";
 import { CountryDto } from "./dto/country.dto";
@@ -69,44 +73,76 @@ export class LocationController {
     }
 
     @UseGuards(AuthGuard)
-    @UseInterceptors(ClassSerializerInterceptor)
+    @UseInterceptors(
+        ClassSerializerInterceptor,
+        FileInterceptor("image", { storage: UploadStorage })
+    )
     @Post("create/city")
-    async createCity(@Body() cityDto: CityDto): Promise<CityOutputDto> {
+    async createCity(
+        @Body() cityDto: CityDto,
+        @UploadedFile() image: Express.Multer.File
+    ): Promise<CityOutputDto> {
+        cityDto.image = `${image.filename}.${mimetypes.extension(
+            image.mimetype
+        )}`;
         return new CityOutputDto(
             await this.locationService.registerCity(cityDto)
         );
     }
 
     @UseGuards(AuthGuard)
-    @UseInterceptors(ClassSerializerInterceptor)
+    @UseInterceptors(
+        ClassSerializerInterceptor,
+        FileInterceptor("image", { storage: UploadStorage })
+    )
     @Post("create/country")
     async createCountry(
-        @Body() countryDto: CountryDto
+        @Body() countryDto: CountryDto,
+        @UploadedFile() image: Express.Multer.File
     ): Promise<CountryOutputDto> {
+        countryDto.image = `${image.filename}.${mimetypes.extension(
+            image.mimetype
+        )}`;
         return new CountryOutputDto(
             await this.locationService.registerCountry(countryDto)
         );
     }
 
     @UseGuards(AuthGuard)
-    @UseInterceptors(ClassSerializerInterceptor)
+    @UseInterceptors(
+        ClassSerializerInterceptor,
+        FileInterceptor("image", { storage: UploadStorage })
+    )
     @Put("country/:id")
     async updateCountry(
         @Param("id") id: string,
-        @Body() countryDto: CountryDto
+        @Body() countryDto: CountryDto,
+        @UploadedFile() image: Express.Multer.File
     ): Promise<CountryOutputDto> {
+        const newImage = `${image.filename}.${mimetypes.extension(
+            image.mimetype
+        )}`;
+        countryDto.image = newImage;
         return new CountryOutputDto(
             await this.locationService.updateCountry(id, countryDto)
         );
     }
 
     @UseGuards(AuthGuard)
-    @UseInterceptors(ClassSerializerInterceptor)
+    @UseInterceptors(
+        ClassSerializerInterceptor,
+        FileInterceptor("image", { storage: UploadStorage })
+    )
     @Put("city/:id")
     async updateCity(
         @Param("id") id: string,
-        @Body() cityDto: CityDto
+        @Body() cityDto: CityDto,
+        @UploadedFile() image: Express.Multer.File
     ): Promise<CityOutputDto> {
+        const newImage = `${image.filename}.${mimetypes.extension(
+            image.mimetype
+        )}`;
+        cityDto.image = newImage;
         return new CityOutputDto(
             await this.locationService.updateCity(id, cityDto)
         );

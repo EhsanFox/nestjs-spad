@@ -9,7 +9,7 @@ export class CountryOutputDto {
     name: string;
     persianName: string;
     description: string;
-    image: Buffer;
+    image: string;
 
     constructor(partial: Partial<CountryOutputDto>) {
         Object.assign(this, partial);

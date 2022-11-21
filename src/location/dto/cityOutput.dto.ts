@@ -11,7 +11,7 @@ export class CityOutputDto {
     name: string;
     persianName: string;
     isPopular: boolean;
-    image: Buffer;
+    image: string;
 
     constructor(partial: Partial<CityOutputDto>) {
         Object.assign(this, partial);

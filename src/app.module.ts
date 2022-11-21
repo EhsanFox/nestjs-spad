@@ -6,12 +6,17 @@ import { AuthModule } from "./auth/auth.module";
 import { ToursModule } from "./tours/tours.module";
 import { LocationsModule } from "./location/locations.module";
 import { UsersModule } from "./users/users.module";
+import { ServeStaticModule } from "@nestjs/serve-static";
+import { join } from "path";
 
 @Module({
     imports: [
         ConfigModule.forRoot(),
         ThrottlerModule.forRoot({ ttl: 60, limit: 10 }),
         MongooseModule.forRoot(process.env.MONGODB_URL),
+        ServeStaticModule.forRoot({
+            rootPath: join(__dirname, "..", "uploads"),
+        }),
         AuthModule,
         LocationsModule,
         ToursModule,
