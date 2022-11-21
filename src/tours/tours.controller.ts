@@ -12,12 +12,11 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import { TourNotFoundException } from "src/excepetions/TourNotFound.excp";
-import { CityDto } from "src/location/dto/city.dto";
+import { CityOutputDto } from "src/location/dto/cityOutput.dto";
 import { LocationService } from "src/location/locations.service";
 import { AuthGuard } from "src/shared/auth.guard";
 import { TourDto } from "./dto/tour.dto";
 import { TourOutputDto } from "./dto/tourOutput.dto";
-import { iTour } from "./interfaces/tours.interface";
 import { ToursService } from "./tours.service";
 
 @Controller("tours")
@@ -35,9 +34,9 @@ export class ToursController {
 
     @UseInterceptors(ClassSerializerInterceptor)
     @Get("popular/cities")
-    async getPopularCities(): Promise<CityDto[]> {
+    async getPopularCities(): Promise<CityOutputDto[]> {
         const list = await this.locationService.getPopularCities();
-        return list.map((x) => new CityDto(x));
+        return list.map((x) => new CityOutputDto(x));
     }
 
     @UseInterceptors(ClassSerializerInterceptor)
