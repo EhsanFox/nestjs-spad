@@ -18,6 +18,7 @@ import { CityNotFoundException } from "src/excepetions/CityNotFound.excp";
 import { CountryNotFoundException } from "src/excepetions/CountryNotFound.excp";
 import { AuthGuard } from "src/shared/auth.guard";
 import { UploadStorage } from "src/shared/images.storage";
+import { UploadFilePipe } from "src/shared/uploadfile.pipe";
 import { CityDto } from "./dto/city.dto";
 import { CityOutputDto } from "./dto/cityOutput.dto";
 import { CountryDto } from "./dto/country.dto";
@@ -80,9 +81,9 @@ export class LocationController {
     @Post("create/city")
     async createCity(
         @Body() cityDto: CityDto,
-        @UploadedFile() image: Express.Multer.File
+        @UploadedFile(UploadFilePipe) image: Express.Multer.File
     ): Promise<CityOutputDto> {
-        cityDto.image = `${image.filename}.${mimetypes.extension(
+        cityDto.image = `/uploads/${image.filename}.${mimetypes.extension(
             image.mimetype
         )}`;
         return new CityOutputDto(
@@ -98,9 +99,9 @@ export class LocationController {
     @Post("create/country")
     async createCountry(
         @Body() countryDto: CountryDto,
-        @UploadedFile() image: Express.Multer.File
+        @UploadedFile(UploadFilePipe) image: Express.Multer.File
     ): Promise<CountryOutputDto> {
-        countryDto.image = `${image.filename}.${mimetypes.extension(
+        countryDto.image = `/uploads/${image.filename}.${mimetypes.extension(
             image.mimetype
         )}`;
         return new CountryOutputDto(
@@ -117,9 +118,9 @@ export class LocationController {
     async updateCountry(
         @Param("id") id: string,
         @Body() countryDto: CountryDto,
-        @UploadedFile() image: Express.Multer.File
+        @UploadedFile(UploadFilePipe) image: Express.Multer.File
     ): Promise<CountryOutputDto> {
-        const newImage = `${image.filename}.${mimetypes.extension(
+        const newImage = `/uploads/${image.filename}.${mimetypes.extension(
             image.mimetype
         )}`;
         countryDto.image = newImage;
@@ -137,9 +138,9 @@ export class LocationController {
     async updateCity(
         @Param("id") id: string,
         @Body() cityDto: CityDto,
-        @UploadedFile() image: Express.Multer.File
+        @UploadedFile(UploadFilePipe) image: Express.Multer.File
     ): Promise<CityOutputDto> {
-        const newImage = `${image.filename}.${mimetypes.extension(
+        const newImage = `/uploads/${image.filename}.${mimetypes.extension(
             image.mimetype
         )}`;
         cityDto.image = newImage;

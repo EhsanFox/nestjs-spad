@@ -19,11 +19,13 @@ import {
     FileInterceptor,
 } from "@nestjs/platform-express";
 import mimetypes from "mime-types";
+import { InternalErrorException } from "src/excepetions";
 import { TourNotFoundException } from "src/excepetions/TourNotFound.excp";
 import { CityOutputDto } from "src/location/dto/cityOutput.dto";
 import { LocationService } from "src/location/locations.service";
 import { AuthGuard } from "src/shared/auth.guard";
 import { UploadStorage } from "src/shared/images.storage";
+import { UploadFilePipe } from "src/shared/uploadfile.pipe";
 import { TourDto } from "./dto/tour.dto";
 import { TourOutputDto } from "./dto/tourOutput.dto";
 import { ToursService } from "./tours.service";
@@ -87,6 +89,25 @@ export class ToursController {
         );
     }
 
+    @UseInterceptors(
+        ClassSerializerInterceptor,
+        FileFieldsInterceptor([{ name: "images" }], { storage: UploadStorage })
+    )
+    @Post("create/tour")
+    async createTour(
+        @UploadedFile(UploadFilePipe) images: Express.Multer.File[],
+        @Body() tourDto: TourDto
+    ): Promise<TourOutputDto> {
+        const imageUrls = images.map(
+            (x) => `/uploads/${x.filename}.${mimetypes.extension(x.mimetype)}`
+        );
+        tourDto.images = imageUrls;
+        const result = await this.tourService.registerTour(tourDto);
+        if (!result)
+            throw new InternalErrorException("Couldn't create a new tour.");
+        return new TourOutputDto(result);
+    }
+
     @UseGuards(AuthGuard)
     @Delete("tour/:id")
     async deleteTour(@Param("id") id: string) {
@@ -102,18 +123,12 @@ export class ToursController {
     @Put("tour/:id")
     async updateTour(
         @Param("id") tourId: string,
-        @UploadedFiles(
-            new ParseFilePipeBuilder()
-                .addFileTypeValidator({
-                    fileType: /(jpg|jpeg|png|gif)/,
-                })
-                .build({ fileIsRequired: true })
-        )
+        @UploadedFiles(UploadFilePipe)
         images: Express.Multer.File[],
         @Body() tourDto: TourDto
     ): Promise<TourOutputDto> {
         const imageUrls = images.map(
-            (x) => `${x.filename}.${mimetypes.extension(x.mimetype)}`
+            (x) => `/uploads/${x.filename}.${mimetypes.extension(x.mimetype)}`
         );
         tourDto.images = imageUrls;
         return new TourOutputDto(
@@ -122,40 +137,5 @@ export class ToursController {
                 tourDto as unknown as TourDto
             )) as unknown as Partial<TourOutputDto>
         );
-    }
-
-    @UseGuards(AuthGuard)
-    @UseInterceptors(
-        FileFieldsInterceptor([{ name: "images" }], { storage: UploadStorage })
-    )
-    @Post("tour/create")
-    async createNewTour(
-        @UploadedFiles(
-            new ParseFilePipeBuilder()
-                .addFileTypeValidator({
-                    fileType: /(jpg|jpeg|png|gif)/,
-                })
-                .build({ fileIsRequired: true })
-        )
-        images: Express.Multer.File[],
-        @Body() tourDto: TourDto
-    ) {
-        const imageUrls = images.map(
-            (x) => `${x.filename}.${mimetypes.extension(x.mimetype)}`
-        );
-        tourDto.images = imageUrls;
-        const result = await this.tourService.registerTour(tourDto);
-        return new TourOutputDto(result as unknown as Partial<TourOutputDto>);
-    }
-
-    @Post("upload-single")
-    @UseInterceptors(
-        FileInterceptor("image", {
-            storage: UploadStorage,
-        })
-    )
-    async uploadSingleFile(@UploadedFile() image: Express.Multer.File) {
-        console.log("image", image);
-        return true;
     }
 }
