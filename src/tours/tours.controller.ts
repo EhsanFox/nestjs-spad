@@ -12,12 +12,8 @@ import {
     UseGuards,
     UploadedFile,
     UploadedFiles,
-    ParseFilePipeBuilder,
 } from "@nestjs/common";
-import {
-    FileFieldsInterceptor,
-    FileInterceptor,
-} from "@nestjs/platform-express";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import mimetypes from "mime-types";
 import { InternalErrorException } from "src/excepetions";
 import { TourNotFoundException } from "src/excepetions/TourNotFound.excp";
