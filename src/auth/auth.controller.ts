@@ -15,12 +15,13 @@ import { Response, Request } from "express";
 import mimetypes from "mime-types";
 
 import { LoginDto, RegisterDto, UpdateDto } from "./dto";
-import { iUploadFile } from "../shared/types";
 
 import { AuthService } from "./auth.service";
 import { AccountDecorator } from "src/shared/account.decorator";
 import { AccountTypeDoc } from "src/shared/interfaces/account.interface";
 import { AuthGuard } from "src/shared/auth.guard";
+import { UploadFilePipe } from "src/shared/uploadfile.pipe";
+import { UploadStorage } from "src/shared/images.storage";
 
 @Controller("auth")
 export class AuthController {
@@ -69,15 +70,17 @@ export class AuthController {
     @UseGuards(AuthGuard)
     @UseInterceptors(
         FileInterceptor("image", {
-            dest: "./uploads",
+            storage: UploadStorage,
         })
     )
     public async updateProfile(
         @AccountDecorator() accountId: number,
-        @UploadedFile() file: iUploadFile
+        @UploadedFile(UploadFilePipe()) file: Express.Multer.File
     ) {
         return await this.authService.updateUser(accountId, {
-            profile: `${file.filename}.${mimetypes.extension(file.mimetype)}`,
+            profile: `/uploads/${file.filename}.${mimetypes.extension(
+                file.mimetype
+            )}`,
         });
     }
 }
