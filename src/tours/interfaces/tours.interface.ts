@@ -8,6 +8,6 @@ export interface iTour extends Document {
     hotelStars: number;
     description: string;
     isPopular: boolean;
-    images: string[];
+    images: { url: string; title: string }[];
     city: string;
 }

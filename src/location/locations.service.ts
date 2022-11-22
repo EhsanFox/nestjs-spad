@@ -7,10 +7,10 @@ import { CountryExistException } from "src/excepetions/CountryExist.excp";
 import { CountryNotFoundException } from "src/excepetions/CountryNotFound.excp";
 import { CityDto } from "./dto/city.dto";
 import { CountryDto } from "./dto/country.dto";
-import { iCity } from "./interfaces/city.interface";
-import { iCountry } from "./interfaces/country.interface";
-import { City } from "./schemas/city.schema";
-import { Country } from "./schemas/country.schema";
+import { iCity } from "../shared/interfaces/city.interface";
+import { iCountry } from "../shared/interfaces/country.interface";
+import { City } from "../shared/schemas/city.schema";
+import { Country } from "../shared/schemas/country.schema";
 
 @Injectable()
 export class LocationService {

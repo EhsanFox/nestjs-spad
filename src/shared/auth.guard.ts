@@ -7,7 +7,7 @@ import {
 } from "@nestjs/common";
 import { verify } from "jsonwebtoken";
 import { Request } from "express";
-import { AccountDocument } from "./account.interface";
+import { AccountDocument } from "./interfaces/account.interface";
 import { UsersService } from "src/users/users.service";
 
 declare module "express" {

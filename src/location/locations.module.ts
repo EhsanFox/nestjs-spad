@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
 import { LocationService } from "./locations.service";
 import { MongooseModule } from "@nestjs/mongoose";
-import { Country, CountrySchema } from "./schemas/country.schema";
-import { City, CitySchema } from "./schemas/city.schema";
+import { Country, CountrySchema } from "../shared/schemas/country.schema";
+import { City, CitySchema } from "../shared/schemas/city.schema";
 @Module({
     imports: [
         MongooseModule.forFeature([

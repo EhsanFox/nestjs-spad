@@ -14,8 +14,8 @@ export class City {
     @Prop({ type: Boolean, required: false, default: false })
     isPopular: boolean;
 
-    @Prop({ type: Buffer, required: true })
-    image: Buffer;
+    @Prop({ type: String, required: true })
+    image: string;
 }
 
 export const CitySchema = SchemaFactory.createForClass(City);

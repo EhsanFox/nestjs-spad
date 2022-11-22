@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { AccountDocument } from "src/shared/account.interface";
-import { Account } from "src/shared/account.schema";
+import { AccountDocument } from "src/shared/interfaces/account.interface";
+import { Account } from "src/shared/schemas/account.schema";
 
 @Injectable()
 export class UsersService {

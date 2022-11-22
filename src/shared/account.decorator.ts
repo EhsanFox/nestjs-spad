@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 import { Request } from "express";
-import { AccountDocument } from "./account.interface";
+import { AccountDocument } from "./interfaces/account.interface";
 
 export const AccountDecorator = createParamDecorator(
     (data: unknown, ctx: ExecutionContext): AccountDocument => {

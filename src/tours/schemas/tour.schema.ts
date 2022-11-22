@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Country } from "src/location/schemas/country.schema";
-import { City } from "../../location/schemas/city.schema";
+import { iCity } from "src/shared/interfaces/city.interface";
+import { CitySchema } from "src/shared/schemas/city.schema";
 import { iTour } from "../interfaces/tours.interface";
 
 @Schema({ timestamps: true })
@@ -26,14 +26,14 @@ export class Tour {
     @Prop({ type: Boolean, required: false, default: false })
     isPopular: boolean;
 
-    @Prop({ type: String, required: true, ref: City.name })
-    city: string;
+    @Prop({ type: CitySchema, required: true })
+    city: iCity;
 
     @Prop({
         type: [
             {
                 title: { type: String, required: true },
-                data: { type: Buffer, required: true },
+                url: { type: String, required: true },
             },
         ],
         required: true,

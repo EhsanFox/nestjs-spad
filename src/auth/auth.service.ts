@@ -13,8 +13,11 @@ import {
     UnauthorizedException,
     InternalErrorException,
 } from "../excepetions";
-import { Account } from "src/shared/account.schema";
-import { AccountTypeDoc, AccountDocument } from "src/shared/account.interface";
+import { Account } from "src/shared/schemas/account.schema";
+import {
+    AccountTypeDoc,
+    AccountDocument,
+} from "src/shared/interfaces/account.interface";
 
 @Injectable()
 export class AuthService {

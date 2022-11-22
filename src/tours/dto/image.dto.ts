@@ -1,10 +1,11 @@
-import { IsAscii, IsString, IsNotEmpty } from "class-validator";
+import { IsAscii, IsString } from "class-validator";
 
 export class ImageDto {
     @IsString()
     @IsAscii()
     title: string;
 
-    @IsNotEmpty()
-    data: Buffer;
+    @IsString()
+    @IsAscii()
+    filename: string;
 }

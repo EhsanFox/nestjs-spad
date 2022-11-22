@@ -19,7 +19,7 @@ import { iUploadFile } from "../shared/types";
 
 import { AuthService } from "./auth.service";
 import { AccountDecorator } from "src/shared/account.decorator";
-import { AccountTypeDoc } from "src/shared/account.interface";
+import { AccountTypeDoc } from "src/shared/interfaces/account.interface";
 import { AuthGuard } from "src/shared/auth.guard";
 
 @Controller("auth")

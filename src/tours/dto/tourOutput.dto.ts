@@ -1,4 +1,5 @@
 import { Exclude } from "class-transformer";
+import { iTour } from "../interfaces/tours.interface";
 
 export class TourOutputDto {
     @Exclude()
@@ -14,7 +15,7 @@ export class TourOutputDto {
     description: string;
     isPopular: boolean;
     city: string;
-    images: string[];
+    images: iTour["images"];
 
     constructor(partial: Partial<TourOutputDto>) {
         Object.assign(this, partial);

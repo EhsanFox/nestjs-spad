@@ -1,12 +1,16 @@
+import { Type } from "class-transformer";
 import {
     IsNumber,
     IsString,
     IsAscii,
     IsBoolean,
     IsOptional,
+    IsArray,
+    ValidateNested,
 } from "class-validator";
 import { IsHotelStar } from "../hotelstar.validator";
 import { IsInt32 } from "../int32.validator";
+import { ImageDto } from "./image.dto";
 
 export class TourDto {
     @IsString()
@@ -36,6 +40,11 @@ export class TourDto {
 
     @IsString()
     city: string;
+
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => ImageDto)
+    imageTitles: { filename: string; title: string }[];
 
     @IsOptional()
     images?: string[];
