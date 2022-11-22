@@ -1,4 +1,5 @@
 import { Document } from "mongoose";
+import { iCity } from "src/shared/interfaces/city.interface";
 
 export interface iTour extends Document {
     name: string;
@@ -9,5 +10,5 @@ export interface iTour extends Document {
     description: string;
     isPopular: boolean;
     images: { url: string; title: string }[];
-    city: string;
+    city: iCity;
 }

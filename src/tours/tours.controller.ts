@@ -16,6 +16,8 @@ import {
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import mimetypes from "mime-types";
 import { InternalErrorException } from "src/excepetions";
+import { CityNotFoundException } from "src/excepetions/CityNotFound.excp";
+import { EmptyQueryException } from "src/excepetions/EmptyQuery.excp";
 import { TourNotFoundException } from "src/excepetions/TourNotFound.excp";
 import { CityOutputDto } from "src/location/dto/cityOutput.dto";
 import { LocationService } from "src/location/locations.service";
@@ -49,14 +51,17 @@ export class ToursController {
     }
 
     @UseInterceptors(ClassSerializerInterceptor)
-    @Get("country/:country")
+    @Get("country")
     async countryTours(
-        @Param("country") country: string,
-        @Query("english") isEnglishName = true
+        @Query("name") name?: string,
+        @Query("persianName") persianName?: string
     ): Promise<TourOutputDto[]> {
+        const country = name ?? persianName;
+        const isPersianName = persianName !== undefined ? true : false;
+        if (country == undefined) throw new EmptyQueryException();
         const tours = await this.tourService.getCountryTours(
             country,
-            !isEnglishName
+            isPersianName
         );
         return tours.map(
             (x) => new TourOutputDto(x as unknown as Partial<TourOutputDto>)
@@ -64,12 +69,15 @@ export class ToursController {
     }
 
     @UseInterceptors(ClassSerializerInterceptor)
-    @Get("city/:city")
+    @Get("city")
     async cityTours(
-        @Param("city") city: string,
-        @Query("english") isEnglishName = true
+        @Query("name") name?: string,
+        @Query("persianName") persianName?: string
     ): Promise<TourOutputDto[]> {
-        const tours = await this.tourService.getCityTours(city, !isEnglishName);
+        const city = name ?? persianName;
+        const isPersianName = persianName !== undefined ? true : false;
+        if (city == undefined) throw new EmptyQueryException();
+        const tours = await this.tourService.getCityTours(city, isPersianName);
         return tours.map(
             (x) => new TourOutputDto(x as unknown as Partial<TourOutputDto>)
         );
@@ -91,7 +99,7 @@ export class ToursController {
     )
     @Post("create/tour")
     async createTour(
-        @UploadedFile(UploadFilePipe) images: Express.Multer.File[],
+        @UploadedFile(UploadFilePipe()) images: Express.Multer.File[],
         @Body() tourDto: TourDto
     ): Promise<TourOutputDto> {
         const imageUrls = images.map(
@@ -119,14 +127,18 @@ export class ToursController {
     @Put("tour/:id")
     async updateTour(
         @Param("id") tourId: string,
-        @UploadedFiles(UploadFilePipe)
-        images: Express.Multer.File[],
-        @Body() tourDto: TourDto
+        @Body() tourDto: TourDto,
+        @UploadedFiles(UploadFilePipe(false))
+        images?: Express.Multer.File[]
     ): Promise<TourOutputDto> {
-        const imageUrls = images.map(
-            (x) => `/uploads/${x.filename}.${mimetypes.extension(x.mimetype)}`
-        );
-        tourDto.images = imageUrls;
+        if (images && images.length) {
+            const imageUrls = images.map(
+                (x) =>
+                    `/uploads/${x.filename}.${mimetypes.extension(x.mimetype)}`
+            );
+            tourDto.images = imageUrls;
+        }
+
         return new TourOutputDto(
             (await this.tourService.updateTour(
                 tourId,

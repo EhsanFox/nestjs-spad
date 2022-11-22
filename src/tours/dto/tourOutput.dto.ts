@@ -1,4 +1,5 @@
 import { Exclude } from "class-transformer";
+import { iCity } from "src/shared/interfaces/city.interface";
 import { iTour } from "../interfaces/tours.interface";
 
 export class TourOutputDto {
@@ -14,7 +15,7 @@ export class TourOutputDto {
     hotelStars: number;
     description: string;
     isPopular: boolean;
-    city: string;
+    city: iCity;
     images: iTour["images"];
 
     constructor(partial: Partial<TourOutputDto>) {

@@ -7,8 +7,10 @@ export class CountryOutputDto {
     __v: unknown;
 
     name: string;
+    countryId: string | number;
     persianName: string;
     description: string;
+    imageTitle: string;
     image: string;
 
     constructor(partial: Partial<CountryOutputDto>) {

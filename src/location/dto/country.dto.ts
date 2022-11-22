@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsOptional, IsString } from "class-validator";
+import { IsAscii, IsOptional, IsString } from "class-validator";
 export class CountryDto {
     @IsString()
     @Transform((x) => {
@@ -19,6 +19,10 @@ export class CountryDto {
 
     @IsString()
     description: string;
+
+    @IsString()
+    @IsAscii()
+    imageTitle: string;
 
     @IsOptional()
     image?: string;

@@ -9,27 +9,27 @@ import { CityDto } from "./dto/city.dto";
 import { CountryDto } from "./dto/country.dto";
 import { iCity } from "../shared/interfaces/city.interface";
 import { iCountry } from "../shared/interfaces/country.interface";
-import { City } from "../shared/schemas/city.schema";
 import { Country } from "../shared/schemas/country.schema";
 
 @Injectable()
 export class LocationService {
     constructor(
-        @InjectModel(City.name) private readonly cityModel: Model<iCity>,
         @InjectModel(Country.name)
         private readonly countryModel: Model<iCountry>
     ) {}
 
     async registerCity(cityDto: CityDto) {
-        const city = await this.cityModel.findOne({ name: cityDto.name });
-        if (city) throw new CityExistException();
+        const country = await this.getCountry(cityDto.country);
+        if (!country) throw new CountryNotFoundException();
 
-        const countryObj = this.countryModel.findOne({ name: cityDto.country });
-        if (!countryObj) throw new CountryNotFoundException();
+        const cityExist = country.cityList.find(
+            (x) =>
+                x.name == cityDto.name || x.persianName == cityDto.persianName
+        );
+        if (cityExist) throw new CityExistException();
 
-        return await this.cityModel.create({
-            ...cityDto,
-        });
+        country.cityList.push(cityDto as iCity);
+        return await country.save();
     }
 
     async registerCountry(countryDto: CountryDto) {
@@ -44,35 +44,91 @@ export class LocationService {
     }
 
     async getPopularCities() {
-        return await this.cityModel.find({ isPopular: true });
+        const query = (await this.countryModel.aggregate([
+            { $match: { "cityList.isPopular": true } },
+            {
+                $project: {
+                    cityList: {
+                        $filter: {
+                            input: "$cityList",
+                            as: "item",
+                            cond: {
+                                $eq: ["$$item.isPopular", true],
+                                // $regex: new RegExp(`^${keyword.toLowerCase()}`, "i")
+                            },
+                        },
+                    },
+                },
+            },
+        ])) as iCountry[];
+        if (!query || !query.length) throw new CityNotFoundException();
+
+        return query;
     }
 
-    async getCountryByRegex(keyword: string, persianName = false) {
-        if (persianName)
-            return await this.countryModel.find({
-                persianName: {
-                    $regex: new RegExp(`^${keyword.toLowerCase()}`, "i"),
-                },
-            });
-        else
-            return await this.countryModel.find({
-                name: {
-                    $regex: new RegExp(`^${keyword.toLowerCase()}`, "i"),
-                },
-            });
+    async getCountryByRegex(keyword: string, isPersianName = false) {
+        return await this.countryModel.find(
+            isPersianName
+                ? {
+                      persianName: {
+                          $regex: new RegExp(`^${keyword.toLowerCase()}`, "i"),
+                      },
+                  }
+                : {
+                      name: {
+                          $regex: new RegExp(`^${keyword.toLowerCase()}`, "i"),
+                      },
+                  }
+        );
     }
 
-    async getCityByRegex(keyword: string, persianName = false) {
-        if (persianName)
-            return await this.cityModel.find({
-                persianName: {
-                    $regex: new RegExp(`^${keyword.toLowerCase()}`, "i"),
+    async getCityByRegex(keyword: string, isPersianName = false) {
+        const query = (await this.countryModel.aggregate([
+            {
+                $match: isPersianName
+                    ? {
+                          "cityList.persianName": {
+                              $regex: new RegExp(
+                                  `^${keyword.toLowerCase()}`,
+                                  "i"
+                              ),
+                          },
+                      }
+                    : {
+                          "cityList.name": {
+                              $regex: new RegExp(
+                                  `^${keyword.toLowerCase()}`,
+                                  "i"
+                              ),
+                          },
+                      },
+            },
+            {
+                $project: {
+                    cityList: {
+                        $filter: {
+                            input: "$cityList",
+                            as: "item",
+                            cond: {
+                                $regexMatch: {
+                                    input: isPersianName
+                                        ? "$$item.persianName"
+                                        : "$$item.name",
+                                    regex: new RegExp(
+                                        `^${keyword.toLowerCase()}`,
+                                        "i"
+                                    ),
+                                    options: "i",
+                                },
+                            },
+                        },
+                    },
                 },
-            });
-        else
-            return await this.cityModel.find({
-                name: { $regex: new RegExp(`^${keyword.toLowerCase()}`, "i") },
-            });
+            },
+        ])) as iCountry[];
+        if (!query || !query.length) throw new CountryNotFoundException();
+
+        return query;
     }
 
     async getCountry(name: string, isPersianName = false) {
@@ -82,9 +138,40 @@ export class LocationService {
     }
 
     async getCity(name: string, isPersianName = false) {
-        if (isPersianName)
-            return await this.cityModel.findOne({ persianName: name });
-        else return await this.cityModel.findOne({ name });
+        const query = (await this.countryModel.aggregate([
+            {
+                $match: isPersianName
+                    ? { "cityList.persianName": name }
+                    : { "cityList.name": name },
+            },
+            {
+                $project: {
+                    cityList: {
+                        $filter: {
+                            input: "$cityList",
+                            as: "item",
+                            cond: {
+                                $eq: isPersianName
+                                    ? ["$$item.persianName", name]
+                                    : ["$$item.name", name],
+                            },
+                        },
+                    },
+                },
+            },
+        ])) as iCountry[];
+
+        if (!query || !query.length) throw new CityNotFoundException();
+        return query;
+    }
+
+    async getCountryCities(country: string, isPersianName = false) {
+        const result = await this.countryModel.find(
+            isPersianName ? { persianName: country } : { name: country }
+        );
+        if (!result) throw new CountryNotFoundException();
+
+        return result;
     }
 
     async getAllCountry() {
@@ -92,18 +179,23 @@ export class LocationService {
     }
 
     async getAllCity() {
-        return await this.cityModel.find({}, { populate: "country" });
+        return await this.countryModel.find();
     }
 
-    async updateCity(_id: string, cityDto: CityDto) {
-        const city = await this.cityModel.findById(_id);
-        if (!city) throw new CityNotFoundException();
+    async updateCity(cityDto: CityDto) {
+        const country = await this.countryModel.findOne({
+            name: cityDto.country,
+        });
+        if (!country) throw new CountryNotFoundException();
 
-        return await this.cityModel.findByIdAndUpdate(
-            _id,
-            { ...cityDto },
-            { new: true }
+        const cityIndex = country.cityList.findIndex(
+            (x) =>
+                x.name === cityDto.name || x.persianName === cityDto.persianName
         );
+        if (cityIndex < 0) throw new CityNotFoundException();
+        country.cityList[cityIndex] = cityDto as iCity;
+
+        return await country.save();
     }
 
     async updateCountry(_id: string, countryDto: CountryDto) {
@@ -117,11 +209,17 @@ export class LocationService {
         );
     }
 
-    async deleteCity(_id: string) {
-        const city = await this.cityModel.findById(_id);
-        if (!city) throw new CityNotFoundException();
+    async deleteCity(countryName: string, name: string, isPersianName = false) {
+        const country = await this.countryModel.findOne({ name: countryName });
+        if (!country) throw new CountryNotFoundException();
 
-        return await this.cityModel.findByIdAndDelete(_id);
+        const cityIndex = country.cityList.findIndex((x) =>
+            isPersianName ? x.persianName === name : x.name === name
+        );
+        if (cityIndex < 0) throw new CityNotFoundException();
+
+        country.cityList.splice(cityIndex, 1);
+        return await country.save();
     }
 
     async deleteCountry(_id: string) {

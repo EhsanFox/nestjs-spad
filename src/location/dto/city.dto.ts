@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsOptional } from "class-validator";
+import { IsString, IsBoolean, IsOptional, IsAscii } from "class-validator";
 
 export class CityDto {
     @IsString()
@@ -12,6 +12,10 @@ export class CityDto {
 
     @IsBoolean()
     isPopular: boolean;
+
+    @IsString()
+    @IsAscii()
+    imageTitle: string;
 
     @IsOptional()
     image?: string;

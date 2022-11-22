@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, _id: false })
 export class City {
     @Prop({ type: String, required: true, lowercase: true })
     country: string;
@@ -13,6 +13,9 @@ export class City {
 
     @Prop({ type: Boolean, required: false, default: false })
     isPopular: boolean;
+
+    @Prop({ type: String, required: true })
+    imageTitle: string;
 
     @Prop({ type: String, required: true })
     image: string;

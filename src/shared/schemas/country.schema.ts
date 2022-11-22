@@ -14,6 +14,9 @@ export class Country {
     description: string;
 
     @Prop({ type: String, required: true })
+    imageTitle: string;
+
+    @Prop({ type: String, required: true })
     image: string;
 
     @Prop({ type: [CitySchema], required: true })

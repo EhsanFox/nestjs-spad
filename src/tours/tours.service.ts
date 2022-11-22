@@ -16,13 +16,21 @@ export class ToursService {
     ) {}
 
     async registerTour(tourDto: TourDto) {
-        const city = await this.locationService.getCity(tourDto.city);
+        const countryList = await this.locationService.getCity(tourDto.city);
         const tourExist = await this.tourModel.findOne({ name: tourDto.name });
         if (tourExist) throw new TourExistException();
 
+        const cityList = [];
+        for (const country of countryList) {
+            cityList.push(...country.cityList);
+        }
+
+        const city = cityList.find(
+            (x) => x.name === tourDto.city || x.persianName === tourDto.city
+        );
         return await this.tourModel.create({
             ...tourDto,
-            city: city._id,
+            city: city,
         });
     }
 
@@ -46,14 +54,11 @@ export class ToursService {
     }
 
     async getCityTours(cityName: string, isPersianName = false) {
-        const city = await this.locationService.getCity(
-            cityName,
-            isPersianName
-        );
-        const tours = await this.tourModel.find(
-            { city: city._id },
-            { populate: "city" }
-        );
+        const tours = await this.tourModel.find({
+            city: isPersianName
+                ? { persianName: cityName }
+                : { name: cityName },
+        });
         if (!tours || !tours.length) throw new TourNotFoundException();
 
         return tours;
@@ -64,17 +69,16 @@ export class ToursService {
             countryName,
             isPersianName
         );
-        const tours = await this.tourModel.find(
-            { country: country._id },
-            { populate: "city" }
-        );
+        const tours = await this.tourModel.find({
+            city: { country: country._id },
+        });
         if (!tours || !tours.length) throw new TourNotFoundException();
 
         return tours;
     }
 
     async getTour(id: string) {
-        const tour = await this.tourModel.findById(id, { populate: "city" });
+        const tour = await this.tourModel.findById(id);
         if (!tour) throw new TourNotFoundException();
 
         return tour;

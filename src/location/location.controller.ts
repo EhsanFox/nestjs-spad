@@ -18,6 +18,7 @@ import { CityNotFoundException } from "src/excepetions/CityNotFound.excp";
 import { CountryNotFoundException } from "src/excepetions/CountryNotFound.excp";
 import { AuthGuard } from "src/shared/auth.guard";
 import { UploadStorage } from "src/shared/images.storage";
+import { iCity } from "src/shared/interfaces/city.interface";
 import { UploadFilePipe } from "src/shared/uploadfile.pipe";
 import { CityDto } from "./dto/city.dto";
 import { CityOutputDto } from "./dto/cityOutput.dto";
@@ -41,7 +42,10 @@ export class LocationController {
         );
         if (!list || !list.length) throw new CityNotFoundException();
 
-        return list.map((x) => new CityOutputDto(x));
+        const cityList = [];
+        for (const country of list) cityList.push(...country.cityList);
+
+        return cityList.map((x) => new CityOutputDto(x));
     }
 
     @UseInterceptors(ClassSerializerInterceptor)
@@ -56,20 +60,55 @@ export class LocationController {
         );
         if (!list || !list.length) throw new CountryNotFoundException();
 
+        for (const country of list) {
+            country.cityList.map((x) => new CityOutputDto(x));
+        }
+
         return list.map((x) => new CountryOutputDto(x));
     }
 
     @UseInterceptors(ClassSerializerInterceptor)
     @Get("city")
-    async getAllCity(): Promise<CityOutputDto[]> {
-        const list = await this.locationService.getAllCity();
-        return list.map((x) => new CityOutputDto(x));
+    async getCity(
+        @Query("name") name?: string,
+        @Query("persianName") persianName?: string,
+        @Query("country") country?: string
+    ): Promise<CityOutputDto[] | CityOutputDto> {
+        const city = name ?? persianName;
+        const isPersianName = persianName !== undefined ? true : false;
+        if (city == undefined) {
+            if (country == undefined) {
+                const list = await this.locationService.getAllCity();
+                return list.map((x) => new CityOutputDto(x));
+            } else {
+            }
+        } else {
+            const countryList = await this.locationService.getCity(
+                city,
+                isPersianName
+            );
+            if (!countryList || !countryList.length)
+                throw new CityNotFoundException();
+
+            const cityObj: iCity[] = [];
+            if (countryList.length <= 1)
+                cityObj.push(...countryList[0].cityList);
+            else {
+                for (const country of countryList) {
+                    cityObj.push(...country.cityList);
+                }
+            }
+            return cityObj.map((x) => new CityOutputDto(x));
+        }
     }
 
     @UseInterceptors(ClassSerializerInterceptor)
     @Get("country")
     async getAllCountry(): Promise<CountryOutputDto[]> {
         const list = await this.locationService.getAllCountry();
+        for (const country of list) {
+            country.cityList.map((x) => new CityOutputDto(x));
+        }
         return list.map((x) => new CountryOutputDto(x));
     }
 
@@ -81,7 +120,7 @@ export class LocationController {
     @Post("create/city")
     async createCity(
         @Body() cityDto: CityDto,
-        @UploadedFile(UploadFilePipe) image: Express.Multer.File
+        @UploadedFile(UploadFilePipe()) image: Express.Multer.File
     ): Promise<CityOutputDto> {
         cityDto.image = `/uploads/${image.filename}.${mimetypes.extension(
             image.mimetype
@@ -99,7 +138,7 @@ export class LocationController {
     @Post("create/country")
     async createCountry(
         @Body() countryDto: CountryDto,
-        @UploadedFile(UploadFilePipe) image: Express.Multer.File
+        @UploadedFile(UploadFilePipe()) image: Express.Multer.File
     ): Promise<CountryOutputDto> {
         countryDto.image = `/uploads/${image.filename}.${mimetypes.extension(
             image.mimetype
@@ -118,12 +157,15 @@ export class LocationController {
     async updateCountry(
         @Param("id") id: string,
         @Body() countryDto: CountryDto,
-        @UploadedFile(UploadFilePipe) image: Express.Multer.File
+        @UploadedFile(UploadFilePipe(false)) image?: Express.Multer.File
     ): Promise<CountryOutputDto> {
-        const newImage = `/uploads/${image.filename}.${mimetypes.extension(
-            image.mimetype
-        )}`;
-        countryDto.image = newImage;
+        if (image) {
+            // TODO: Remove OLD Image
+            const newImage = `/uploads/${image.filename}.${mimetypes.extension(
+                image.mimetype
+            )}`;
+            countryDto.image = newImage;
+        }
         return new CountryOutputDto(
             await this.locationService.updateCountry(id, countryDto)
         );
@@ -134,25 +176,31 @@ export class LocationController {
         ClassSerializerInterceptor,
         FileInterceptor("image", { storage: UploadStorage })
     )
-    @Put("city/:id")
+    @Put("city")
     async updateCity(
-        @Param("id") id: string,
         @Body() cityDto: CityDto,
-        @UploadedFile(UploadFilePipe) image: Express.Multer.File
+        @UploadedFile(UploadFilePipe(false)) image?: Express.Multer.File
     ): Promise<CityOutputDto> {
-        const newImage = `/uploads/${image.filename}.${mimetypes.extension(
-            image.mimetype
-        )}`;
-        cityDto.image = newImage;
+        if (image) {
+            // TODO: Remove old Image
+            const newImage = `/uploads/${image.filename}.${mimetypes.extension(
+                image.mimetype
+            )}`;
+            cityDto.image = newImage;
+        }
+
         return new CityOutputDto(
-            await this.locationService.updateCity(id, cityDto)
+            await this.locationService.updateCity(cityDto)
         );
     }
 
     @UseGuards(AuthGuard)
-    @Delete("city/:id")
-    async deleteCity(@Param("id") id: string) {
-        const result = await this.locationService.deleteCity(id);
+    @Delete("city/:country/:name")
+    async deleteCity(
+        @Param("country") country: string,
+        @Param("name") name: string
+    ) {
+        const result = await this.locationService.deleteCity(country, name);
         return !!result;
     }
 
