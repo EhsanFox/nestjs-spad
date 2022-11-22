@@ -1,11 +1,9 @@
-import { Exclude } from "class-transformer";
+import { Types } from "mongoose";
 import { iCity } from "src/shared/interfaces/city.interface";
 import { iTour } from "../interfaces/tours.interface";
 
 export class TourOutputDto {
-    @Exclude()
-    _id: unknown;
-    @Exclude()
+    _id: Types.ObjectId;
     __v: unknown;
 
     name: string;
@@ -19,6 +17,14 @@ export class TourOutputDto {
     images: iTour["images"];
 
     constructor(partial: Partial<TourOutputDto>) {
-        Object.assign(this, partial);
+        this.name = partial.name;
+        this.price = partial.price;
+        this.stayingDays = partial.stayingDays;
+        this.airline = partial.airline;
+        this.hotelStars = partial.hotelStars;
+        this.description = partial.description;
+        this.isPopular = partial.isPopular;
+        this.city = partial.city;
+        this.images = partial.images;
     }
 }

@@ -38,9 +38,8 @@ export class LocationService {
         });
         if (country) throw new CountryExistException();
 
-        return await this.countryModel.create({
-            ...countryDto,
-        });
+        const query = await this.countryModel.create(countryDto);
+        return await query.save();
     }
 
     async getPopularCities() {

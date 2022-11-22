@@ -47,7 +47,13 @@ export class ToursController {
     @Get("popular/cities")
     async getPopularCities(): Promise<CityOutputDto[]> {
         const list = await this.locationService.getPopularCities();
-        return list.map((x) => new CityOutputDto(x));
+        const cityList = [];
+        for (const country of list) {
+            cityList.push(...country.cityList);
+        }
+        return cityList.map(
+            (x) => new CityOutputDto(x as unknown as CityOutputDto)
+        );
     }
 
     @UseInterceptors(ClassSerializerInterceptor)
@@ -102,9 +108,7 @@ export class ToursController {
         @UploadedFile(UploadFilePipe()) images: Express.Multer.File[],
         @Body() tourDto: TourDto
     ): Promise<TourOutputDto> {
-        const imageUrls = images.map(
-            (x) => `/uploads/${x.filename}.${mimetypes.extension(x.mimetype)}`
-        );
+        const imageUrls = images.map((x) => `/uploads/${x.filename}`);
         tourDto.images = imageUrls;
         const result = await this.tourService.registerTour(tourDto);
         if (!result)
@@ -132,10 +136,7 @@ export class ToursController {
         images?: Express.Multer.File[]
     ): Promise<TourOutputDto> {
         if (images && images.length) {
-            const imageUrls = images.map(
-                (x) =>
-                    `/uploads/${x.filename}.${mimetypes.extension(x.mimetype)}`
-            );
+            const imageUrls = images.map((x) => `/uploads/${x.filename}`);
             tourDto.images = imageUrls;
         }
 

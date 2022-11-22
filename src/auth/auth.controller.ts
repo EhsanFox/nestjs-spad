@@ -78,9 +78,7 @@ export class AuthController {
         @UploadedFile(UploadFilePipe()) file: Express.Multer.File
     ) {
         return await this.authService.updateUser(accountId, {
-            profile: `/uploads/${file.filename}.${mimetypes.extension(
-                file.mimetype
-            )}`,
+            profile: `/uploads/${file.filename}`,
         });
     }
 }

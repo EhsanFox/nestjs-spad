@@ -13,7 +13,7 @@ import {
     UploadedFile,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import mimetypes from "mime-types";
+import * as mimetypes from "mime-types";
 import { CityNotFoundException } from "src/excepetions/CityNotFound.excp";
 import { CountryNotFoundException } from "src/excepetions/CountryNotFound.excp";
 import { AuthGuard } from "src/shared/auth.guard";
@@ -61,10 +61,14 @@ export class LocationController {
         if (!list || !list.length) throw new CountryNotFoundException();
 
         for (const country of list) {
-            country.cityList.map((x) => new CityOutputDto(x));
+            country.cityList.map(
+                (x) => new CityOutputDto(x as unknown as CityOutputDto)
+            );
         }
 
-        return list.map((x) => new CountryOutputDto(x));
+        return list.map(
+            (x) => new CountryOutputDto(x as unknown as CountryOutputDto)
+        );
     }
 
     @UseInterceptors(ClassSerializerInterceptor)
@@ -79,7 +83,9 @@ export class LocationController {
         if (city == undefined) {
             if (country == undefined) {
                 const list = await this.locationService.getAllCity();
-                return list.map((x) => new CityOutputDto(x));
+                return list.map(
+                    (x) => new CityOutputDto(x as unknown as CityOutputDto)
+                );
             } else {
             }
         } else {
@@ -98,7 +104,9 @@ export class LocationController {
                     cityObj.push(...country.cityList);
                 }
             }
-            return cityObj.map((x) => new CityOutputDto(x));
+            return cityObj.map(
+                (x) => new CityOutputDto(x as unknown as CityOutputDto)
+            );
         }
     }
 
@@ -107,9 +115,13 @@ export class LocationController {
     async getAllCountry(): Promise<CountryOutputDto[]> {
         const list = await this.locationService.getAllCountry();
         for (const country of list) {
-            country.cityList.map((x) => new CityOutputDto(x));
+            country.cityList.map(
+                (x) => new CityOutputDto(x as unknown as CityOutputDto)
+            );
         }
-        return list.map((x) => new CountryOutputDto(x));
+        return list.map(
+            (x) => new CountryOutputDto(x as unknown as CountryOutputDto)
+        );
     }
 
     @UseGuards(AuthGuard)
@@ -122,11 +134,11 @@ export class LocationController {
         @Body() cityDto: CityDto,
         @UploadedFile(UploadFilePipe()) image: Express.Multer.File
     ): Promise<CityOutputDto> {
-        cityDto.image = `/uploads/${image.filename}.${mimetypes.extension(
-            image.mimetype
-        )}`;
+        cityDto.image = `/uploads/${image.filename}`;
         return new CityOutputDto(
-            await this.locationService.registerCity(cityDto)
+            (await this.locationService.registerCity(
+                cityDto
+            )) as unknown as CityOutputDto
         );
     }
 
@@ -140,11 +152,11 @@ export class LocationController {
         @Body() countryDto: CountryDto,
         @UploadedFile(UploadFilePipe()) image: Express.Multer.File
     ): Promise<CountryOutputDto> {
-        countryDto.image = `/uploads/${image.filename}.${mimetypes.extension(
-            image.mimetype
-        )}`;
+        countryDto.image = `/uploads/${image.filename}`;
         return new CountryOutputDto(
-            await this.locationService.registerCountry(countryDto)
+            (await this.locationService.registerCountry(
+                countryDto
+            )) as unknown as CountryOutputDto
         );
     }
 
@@ -161,13 +173,14 @@ export class LocationController {
     ): Promise<CountryOutputDto> {
         if (image) {
             // TODO: Remove OLD Image
-            const newImage = `/uploads/${image.filename}.${mimetypes.extension(
-                image.mimetype
-            )}`;
+            const newImage = `/uploads/${image.filename}`;
             countryDto.image = newImage;
         }
         return new CountryOutputDto(
-            await this.locationService.updateCountry(id, countryDto)
+            (await this.locationService.updateCountry(
+                id,
+                countryDto
+            )) as unknown as CountryOutputDto
         );
     }
 
@@ -183,14 +196,14 @@ export class LocationController {
     ): Promise<CityOutputDto> {
         if (image) {
             // TODO: Remove old Image
-            const newImage = `/uploads/${image.filename}.${mimetypes.extension(
-                image.mimetype
-            )}`;
+            const newImage = `/uploads/${image.filename}`;
             cityDto.image = newImage;
         }
 
         return new CityOutputDto(
-            await this.locationService.updateCity(cityDto)
+            (await this.locationService.updateCity(
+                cityDto
+            )) as unknown as CityOutputDto
         );
     }
 

@@ -18,7 +18,6 @@ import { join } from "path";
             rootPath: join(__dirname, "..", "uploads"),
         }),
         AuthModule,
-        LocationsModule,
         ToursModule,
         UsersModule,
     ],

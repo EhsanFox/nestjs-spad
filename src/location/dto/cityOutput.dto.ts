@@ -1,10 +1,7 @@
-import { Exclude } from "class-transformer";
+import { Types } from "mongoose";
 
 export class CityOutputDto {
-    @Exclude()
-    _id: string;
-
-    @Exclude()
+    _id: Types.ObjectId;
     __v: unknown;
 
     country: string;
@@ -15,6 +12,11 @@ export class CityOutputDto {
     image: string;
 
     constructor(partial: Partial<CityOutputDto>) {
-        Object.assign(this, partial);
+        this.country = partial.country;
+        this.name = partial.name;
+        this.persianName = partial.persianName;
+        this.isPopular = partial.isPopular;
+        this.image = partial.image;
+        this.imageTitle = partial.imageTitle;
     }
 }
